@@ -65,6 +65,26 @@ module Catpix
     margins = get_margins img, options[:center_x], options[:center_y]
     margins[:colour] = options[:bg_fill] ? options[:bg] : nil
 
+    out = StringIO.new
+    $stdout = out
+    do_print_image(img, margins, options)
+    $stdout = STDOUT
+
+    if options[:dont_print].nil?
+      print out.string
+    else
+      return out.string
+    end
+  end
+
+  def self.build_image_string(path, options={})
+    options[:dont_print] = true
+    print_image(path, options)
+  end
+
+  private
+
+  def self.do_print_image(img, margins, options)
     if high_res?
       do_print_image_hr img, margins, options
     else
