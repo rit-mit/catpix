@@ -5,6 +5,9 @@ require "rmagick"
 require "tco"
 require "terminfo"
 
+require 'net/http'
+require 'uri'
+
 module Catpix
   private
   MAX_OPACITY = 65535
@@ -74,6 +77,18 @@ module Catpix
 
   def self.load_image(path)
     Magick::Image::read(path).first
+  end
+
+  def self.load_image_with_http_header(image_url, http_header = {})
+    uri = URI.parse(image_url)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true if uri.port == URI::HTTPS.default_port
+
+    req = Net::HTTP::Get.new(image_url)
+    http_header.each { |k,v| req[k] = v }
+    res = http.request(req)
+
+    Magick::Image.from_blob(res.body).first
   end
 
   # Scale the image down based on the limits while keeping the aspect ratio

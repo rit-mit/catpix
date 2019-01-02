@@ -55,7 +55,11 @@ module Catpix
     end
     @@resolution = options[:resolution]
 
-    img = load_image path
+    if options[:http_header].nil?
+      img = load_image path
+    else
+      img = load_image_with_http_header path, options[:http_header]
+    end
     resize! img, options[:limit_x], options[:limit_y]
 
     margins = get_margins img, options[:center_x], options[:center_y]
